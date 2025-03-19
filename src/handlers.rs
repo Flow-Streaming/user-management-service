@@ -170,3 +170,46 @@ pub async fn get_user_data(
     // Return user data
     Ok(Json(user_data))
 }
+
+pub async fn update_user_data(
+    State(config): State<AppState>,
+    Path(user_id): Path<String>,
+    Json(user_data): Json<Value>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let client = Client::new();
+
+    // Update user data in the database
+    let db_response = match client
+        .patch(format!(
+            "{}/rest/v1/users?id=eq.{}",
+            config.supabase_url, user_id
+        ))
+        .header("apikey", &config.supabase_api_key)
+        .header(
+            "Authorization",
+            format!("Bearer {}", &config.supabase_api_key),
+        )
+        .json(&user_data)
+        .send()
+        .await
+    {
+        Ok(response) => response,
+        Err(e) => {
+            error!("Failed to update user data in database: {}", e);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string()));
+        }
+    };
+
+    // Check database response
+    if !db_response.status().is_success() {
+        let error_text = db_response
+            .text()
+            .await
+            .unwrap_or_else(|_| "Unknown error".to_string());
+        error!("Database user data update failed: {}", error_text);
+        return Err((StatusCode::INTERNAL_SERVER_ERROR, error_text));
+    }
+
+    // Return success response
+    Ok(StatusCode::OK)
+}
