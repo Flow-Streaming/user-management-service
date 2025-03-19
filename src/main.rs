@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         .with_state(config); // Clone the Arc<AppState> to avoid ownership issues
 
     // Start the server
-    let addr = SocketAddr::from(([0, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
     info!("Server starting on {}", addr);
 
     // Use tokio's TcpListener instead of std's
