@@ -1,5 +1,8 @@
 use anyhow::Result;
-use axum::{Router, routing::post};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 use reqwest::Method;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
@@ -33,6 +36,10 @@ async fn main() -> Result<()> {
     // Build the application router
     let app = Router::new()
         .route("/users", post(handlers::sign_up_user))
+        .route(
+            "/users/{user_id}",
+            get(handlers::get_user_data).put(handlers::update_user_data),
+        )
         .layer(cors)
         .with_state(config); // Clone the Arc<AppState> to avoid ownership issues
 
