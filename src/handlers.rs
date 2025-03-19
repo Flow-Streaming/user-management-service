@@ -1,9 +1,13 @@
-use axum::{Json, extract::State, response::IntoResponse};
+use axum::{
+    Json,
+    extract::{Path, State},
+    response::IntoResponse,
+};
 use reqwest::{Client, StatusCode};
 use serde_json::{Value, json};
 use tracing::{error, info};
 
-use crate::models::{AppState, AuthResponse, GetDataRequest, SignUpRequest, SignUpResponse};
+use crate::models::{AppState, AuthResponse, SignUpRequest, SignUpResponse};
 
 pub async fn sign_up_user(
     State(config): State<AppState>,
@@ -126,7 +130,7 @@ pub async fn sign_up_user(
 
 pub async fn get_user_data(
     State(config): State<AppState>,
-    Json(payload): Json<GetDataRequest>,
+    Path(user_id): Path<String>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let client = Client::new();
 
@@ -134,7 +138,7 @@ pub async fn get_user_data(
     let db_response = match client
         .get(format!(
             "{}/rest/v1/users?id=eq.{}",
-            config.supabase_url, payload.user_id
+            config.supabase_url, user_id
         ))
         .header("apikey", &config.supabase_api_key)
         .header(

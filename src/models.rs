@@ -14,11 +14,6 @@ pub struct SignUpRequest {
     pub profile_picture_url: Option<String>,
 }
 
-#[derive(Deserialize)]
-pub struct GetDataRequest {
-    pub user_id: String,
-}
-
 #[derive(Serialize, Debug)]
 pub struct SignUpResponse {
     pub user_id: String,
